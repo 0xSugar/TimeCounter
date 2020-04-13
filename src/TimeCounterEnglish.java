@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.rmi.registry.LocateRegistry;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -9,32 +10,33 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * @author skul
  */
 
-public class TimeCounter {
+public class TimeCounterEnglish {
     private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     public static void main(String[] args) throws IOException, ParseException {
-        System.out.print("Введите свой пол: ");
+        System.out.print("Enter your gender (m/w): ");
         boolean sex = checkSEX();
 
-        System.out.print("\nВведите дату рождения (формат 16.02.1102): ");
+        System.out.print("\nEnter your date of birth (format 16/02/1985): ");
         Calendar dateOfBirth = checkDate();
 
-        System.out.print("\nВведите вашу страну проживания (UA / RU): ");
+        System.out.print("\nEnter the country you live (UA / USA / AMS): ");
         String livedCountry = checkCountry();
 
         HashMap<String, Integer> map = fillHashMap();
 
-        SimpleDateFormat type1 = new SimpleDateFormat("dd.MM.yyyy");
-        System.out.println("Вы родились: " + type1.format(dateOfBirth.getTime()));
+        SimpleDateFormat type1 = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+        System.out.println("You were born: " + type1.format(dateOfBirth.getTime()));
         howManyLived(dateOfBirth);
         leftToLive(dateOfBirth, sex, livedCountry, map);
     }
 
-    /** Считывает пол / дату / страну и проверяет */
+    /** Read sex / date / country and chech it */
     private static boolean checkSEX() throws IOException {
         boolean sex;
         while (true) {
@@ -47,7 +49,7 @@ public class TimeCounter {
                 sex = false;
                 break;
             } else {
-                System.out.print("\nОшибка. Введите ваш пол: ");
+                System.out.print("\nMistake. Enter your gender (man / woman): ");
             }
         }
         return sex;
@@ -57,28 +59,28 @@ public class TimeCounter {
         while (true) {
             dateOfBirth = reader.readLine();
             if (isCorrectDate(dateOfBirth)) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 Date date = sdf.parse(dateOfBirth);
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 return calendar;
             }
-            System.out.print("\nВведен неправильный формат, попробуйте еще раз (вводить день, месяц, год через точку): ");
+            System.out.print("\nInvalid format, try again: ");
         }
     }
     private static boolean isCorrectDate(String dateline) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         Calendar timeNow = Calendar.getInstance();
         Date date;
 
-        try { // проверка сделала, что бы не пропускать такие значения 2142.4.21412.421.4.124.1 - он принимает 2142 дня, 4 месяц и 21412 год, остальное отбрасывает
-            String[] checker = dateline.split("\\.");
-            if (checker.length > 3) { // если больше 3х значений через точку
+        try { // check doesn't allow such values 21424/21412/421/4/124/1 - it thinks like 2142 days, 4 months and 21412 year, other
+            String[] checker = dateline.split("/");
+            if (checker.length > 3) { // if the line has more than 3 values (15/04/1982/23)
                 return false;
-            } else if (Integer.parseInt(checker[0]) > 31) {  // если день 32+
+            } else if (Integer.parseInt(checker[0]) > 31) {  // if day is 32+
                 return false;
-            } else if (Integer.parseInt(checker[1]) > 12) { // если месяц 13+
-                return false;                               // если год до 1900 или после 2021 (сейчас + 1)
+            } else if (Integer.parseInt(checker[1]) > 12) { // if month is 13+
+                return false;                               // if the year is until 1900 or after 2021 (if now (2020) + 1)
             } else if (!(Integer.parseInt(checker[2]) > 1900 && Integer.parseInt(checker[2]) < (timeNow.get(Calendar.YEAR) + 1))) {
                 return false;
             }
@@ -98,12 +100,15 @@ public class TimeCounter {
             country = reader.readLine();
             country = country.toUpperCase();
             if (country.length() < 4 || country.equals("УКРАИНА") || country.equals("РОССИЯ") || country.equals("UKRAINE") || country.equals("RUSSIA")) {
+                // If Ukraine - return UA
                 if (country.equals("УКРАИНА") || country.equals("UKRAINE")) {
                     return "UA";
-                } // Если Украина - вернуть UA
+                }
+                // If Russia - return RU
                 if (country.equals("РОССИЯ") || country.equals("RUSSIA")) {
                     return "RU";
-                } // Если Россия - вернуть RU
+                }
+                // if the country has 3 letters - return this country in 2 symbols
                 if (country.length() == 3 && (country.equals("РУС") || country.equals("УКР") || country.equals("UKR") || country.equals("AFG") || country.equals("ALB") || country.equals("DZA") || country.equals("ASM") || country.equals("AND") || country.equals("AGO") || country.equals("AIA") || country.equals("ATA") || country.equals("ATG") || country.equals("ARG") || country.equals("ARM") || country.equals("ABW") || country.equals("AUS") || country.equals("AUT") || country.equals("AZE") || country.equals("BHS") || country.equals("BHR") || country.equals("BGD") || country.equals("BRB") || country.equals("BLR") || country.equals("BEL") || country.equals("BLZ") || country.equals("BEN") || country.equals("BMU") || country.equals("BTN") || country.equals("BOL") || country.equals("BIH") || country.equals("BWA") || country.equals("BRA") || country.equals("IOT") || country.equals("VGB") || country.equals("BRN") || country.equals("BGR") || country.equals("BFA") || country.equals("BDI") || country.equals("KHM") || country.equals("CMR") || country.equals("CAN") || country.equals("CPV") || country.equals("CYM") || country.equals("CAF") || country.equals("TCD") || country.equals("CHL") || country.equals("CHN") || country.equals("CXR") || country.equals("CCK") || country.equals("COL") || country.equals("COM") || country.equals("COK") || country.equals("CRI") || country.equals("HRV") || country.equals("CUB") || country.equals("CUW") || country.equals("CYP") || country.equals("CZE") || country.equals("COD") || country.equals("DNK") || country.equals("DJI") || country.equals("DMA") || country.equals("DOM") || country.equals("TLS") || country.equals("ECU") || country.equals("EGY") || country.equals("SLV") || country.equals("GNQ") || country.equals("ERI") || country.equals("EST") || country.equals("ETH") || country.equals("FLK") || country.equals("FRO") || country.equals("FJI") || country.equals("FIN") || country.equals("FRA") || country.equals("PYF") || country.equals("GAB") || country.equals("GMB") || country.equals("GEO") || country.equals("DEU") || country.equals("GHA") || country.equals("GIB") || country.equals("GRC") || country.equals("GRL") || country.equals("GRD") || country.equals("GUM") || country.equals("GTM") || country.equals("GGY") || country.equals("GIN") || country.equals("GNB") || country.equals("GUY") || country.equals("HTI") || country.equals("HND") || country.equals("HKG") || country.equals("HUN") || country.equals("ISL") || country.equals("IND") || country.equals("IDN") || country.equals("IRN") || country.equals("IRQ") || country.equals("IRL") || country.equals("IMN") || country.equals("ISR") || country.equals("ITA") || country.equals("CIV") || country.equals("JAM") || country.equals("JPN") || country.equals("JEY") || country.equals("JOR") || country.equals("KAZ") || country.equals("KEN") || country.equals("KIR") || country.equals("XKX") || country.equals("KWT") || country.equals("KGZ") || country.equals("LAO") || country.equals("LVA") || country.equals("LBN") || country.equals("LSO") || country.equals("LBR") || country.equals("LBY") || country.equals("LIE") || country.equals("LTU") || country.equals("LUX") || country.equals("MAC") || country.equals("MKD") || country.equals("MDG") || country.equals("MWI") || country.equals("MYS") || country.equals("MDV") || country.equals("MLI") || country.equals("MLT") || country.equals("MHL") || country.equals("MRT") || country.equals("MUS") || country.equals("MYT") || country.equals("MEX") || country.equals("FSM") || country.equals("MDA") || country.equals("MCO") || country.equals("MNG") || country.equals("MNE") || country.equals("MSR") || country.equals("MAR") || country.equals("MOZ") || country.equals("MMR") || country.equals("NAM") || country.equals("NRU") || country.equals("NPL") || country.equals("NLD") || country.equals("ANT") || country.equals("NCL") || country.equals("NZL") || country.equals("NIC") || country.equals("NER") || country.equals("NGA") || country.equals("NIU") || country.equals("PRK") || country.equals("MNP") || country.equals("NOR") || country.equals("OMN") || country.equals("PAK") || country.equals("PLW") || country.equals("PSE") || country.equals("PAN") || country.equals("PNG") || country.equals("PRY") || country.equals("PER") || country.equals("PHL") || country.equals("PCN") || country.equals("POL") || country.equals("PRT") || country.equals("PRI") || country.equals("QAT") || country.equals("COG") || country.equals("REU") || country.equals("ROU") || country.equals("RUS") || country.equals("RWA") || country.equals("BLM") || country.equals("SHN") || country.equals("KNA") || country.equals("LCA") || country.equals("MAF") || country.equals("SPM") || country.equals("VCT") || country.equals("WSM") || country.equals("SMR") || country.equals("STP") || country.equals("SAU") || country.equals("SEN") || country.equals("SRB") || country.equals("SYC") || country.equals("SLE") || country.equals("SGP") || country.equals("SXM") || country.equals("SVK") || country.equals("SVN") || country.equals("SLB") || country.equals("SOM") || country.equals("ZAF") || country.equals("KOR") || country.equals("SSD") || country.equals("ESP") || country.equals("LKA") || country.equals("SDN") || country.equals("SUR") || country.equals("SJM") || country.equals("SWZ") || country.equals("SWE") || country.equals("CHE") || country.equals("SYR") || country.equals("TWN") || country.equals("TJK") || country.equals("TZA") || country.equals("THA") || country.equals("TGO") || country.equals("TKL") || country.equals("TON") || country.equals("TTO") || country.equals("TUN") || country.equals("TUR") || country.equals("TKM") || country.equals("TCA") || country.equals("TUV") || country.equals("VIR") || country.equals("UGA") || country.equals("ARE") || country.equals("GBR") || country.equals("USA") || country.equals("URY") || country.equals("UZB") || country.equals("VUT") || country.equals("VAT") || country.equals("VEN") || country.equals("VNM") || country.equals("WLF") || country.equals("ESH") || country.equals("YEM") || country.equals("ZMB") || country.equals("ZWE"))) {
                     if (country.equals("РУС")) return "RU";
                     if (country.equals("RUS")) return "RU";
@@ -347,18 +352,19 @@ public class TimeCounter {
                     if (country.equals("YEM")) return "YE";
                     if (country.equals("ZMB")) return "ZM";
                     if (country.equals("ZWE")) return "ZW";
-                } // если страна из 3х букв - вернуть эту страну в 2х символах
+                }
+                // if the country has 2 letters - return this country
                 if (country.length() == 2 && (country.equals("AF") || country.equals("AL") || country.equals("DZ") || country.equals("AS") || country.equals("AD") || country.equals("AO") || country.equals("AI") || country.equals("AQ") || country.equals("AG") || country.equals("AR") || country.equals("AM") || country.equals("AW") || country.equals("AU") || country.equals("AT") || country.equals("AZ") || country.equals("BS") || country.equals("BH") || country.equals("BD") || country.equals("BB") || country.equals("BY") || country.equals("BE") || country.equals("BZ") || country.equals("BJ") || country.equals("BM") || country.equals("BT") || country.equals("BO") || country.equals("BA") || country.equals("BW") || country.equals("BR") || country.equals("IO") || country.equals("VG") || country.equals("BN") || country.equals("BG") || country.equals("BF") || country.equals("BI") || country.equals("KH") || country.equals("CM") || country.equals("CA") || country.equals("CV") || country.equals("KY") || country.equals("CF") || country.equals("TD") || country.equals("CL") || country.equals("CN") || country.equals("CX") || country.equals("CC") || country.equals("CO") || country.equals("KM") || country.equals("CK") || country.equals("CR") || country.equals("HR") || country.equals("CU") || country.equals("CW") || country.equals("CY") || country.equals("CZ") || country.equals("CD") || country.equals("DK") || country.equals("DJ") || country.equals("DM") || country.equals("DO") || country.equals("TL") || country.equals("EC") || country.equals("EG") || country.equals("SV") || country.equals("GQ") || country.equals("ER") || country.equals("EE") || country.equals("ET") || country.equals("FK") || country.equals("FO") || country.equals("FJ") || country.equals("FI") || country.equals("FR") || country.equals("PF") || country.equals("GA") || country.equals("GM") || country.equals("GE") || country.equals("DE") || country.equals("GH") || country.equals("GI") || country.equals("GR") || country.equals("GL") || country.equals("GD") || country.equals("GU") || country.equals("GT") || country.equals("GG") || country.equals("GN") || country.equals("GW") || country.equals("GY") || country.equals("HT") || country.equals("HN") || country.equals("HK") || country.equals("HU") || country.equals("IS") || country.equals("IN") || country.equals("ID") || country.equals("IR") || country.equals("IQ") || country.equals("IE") || country.equals("IM") || country.equals("IL") || country.equals("IT") || country.equals("CI") || country.equals("JM") || country.equals("JP") || country.equals("JE") || country.equals("JO") || country.equals("KZ") || country.equals("KE") || country.equals("KI") || country.equals("XK") || country.equals("KW") || country.equals("KG") || country.equals("LA") || country.equals("LV") || country.equals("LB") || country.equals("LS") || country.equals("LR") || country.equals("LY") || country.equals("LI") || country.equals("LT") || country.equals("LU") || country.equals("MO") || country.equals("MK") || country.equals("MG") || country.equals("MW") || country.equals("MY") || country.equals("MV") || country.equals("ML") || country.equals("MT") || country.equals("MH") || country.equals("MR") || country.equals("MU") || country.equals("YT") || country.equals("MX") || country.equals("FM") || country.equals("MD") || country.equals("MC") || country.equals("MN") || country.equals("ME") || country.equals("MS") || country.equals("MA") || country.equals("MZ") || country.equals("MM") || country.equals("NA") || country.equals("NR") || country.equals("NP") || country.equals("NL") || country.equals("AN") || country.equals("NC") || country.equals("NZ") || country.equals("NI") || country.equals("NE") || country.equals("NG") || country.equals("NU") || country.equals("KP") || country.equals("MP") || country.equals("NO") || country.equals("OM") || country.equals("PK") || country.equals("PW") || country.equals("PS") || country.equals("PA") || country.equals("PG") || country.equals("PY") || country.equals("PE") || country.equals("PH") || country.equals("PN") || country.equals("PL") || country.equals("PT") || country.equals("PR") || country.equals("QA") || country.equals("CG") || country.equals("RE") || country.equals("RO") || country.equals("RU") || country.equals("RW") || country.equals("BL") || country.equals("SH") || country.equals("KN") || country.equals("LC") || country.equals("MF") || country.equals("PM") || country.equals("VC") || country.equals("WS") || country.equals("SM") || country.equals("ST") || country.equals("SA") || country.equals("SN") || country.equals("RS") || country.equals("SC") || country.equals("SL") || country.equals("SG") || country.equals("SX") || country.equals("SK") || country.equals("SI") || country.equals("SB") || country.equals("SO") || country.equals("ZA") || country.equals("KR") || country.equals("SS") || country.equals("ES") || country.equals("LK") || country.equals("SD") || country.equals("SR") || country.equals("SJ") || country.equals("SZ") || country.equals("SE") || country.equals("CH") || country.equals("SY") || country.equals("TW") || country.equals("TJ") || country.equals("TZ") || country.equals("TH") || country.equals("TG") || country.equals("TK") || country.equals("TO") || country.equals("TT") || country.equals("TN") || country.equals("TR") || country.equals("TM") || country.equals("TC") || country.equals("TV") || country.equals("VI") || country.equals("UG") || country.equals("UA") || country.equals("AE") || country.equals("GB") || country.equals("US") || country.equals("UY") || country.equals("UZ") || country.equals("VU") || country.equals("VA") || country.equals("VE") || country.equals("VN") || country.equals("WF") || country.equals("EH") || country.equals("YE") || country.equals("ZM") || country.equals("ZW") || country.equals("ЮА") || country.equals("РУ"))) {
                     return country;
                 }
-                System.out.print("\nНеверный формат страны, попробуйте еще раз: ");
+                System.out.print("\nInvalid format of the country, try again: ");
             } else {
-                System.out.print("\nНеверный формат страны, попробуйте еще раз: ");
+                System.out.print("\nInvalid format of the country, try again: ");
             }
         }
     }
 
-    /** Заполняет HashMap длительностью жизни по странам */
+    /** Fills HashMap with longevity of life over countries */
     private static HashMap<String, Integer> fillHashMap() {
         HashMap<String, Integer> map = new HashMap();
         map.put("AF_M", 63);
@@ -844,47 +850,42 @@ public class TimeCounter {
         return map;
     }
 
-    /** Считает сколько уже прожито и выводит */
+    /** Counts how much time lived and print it */
     private static void howManyLived(Calendar dateOfBirth){
         Calendar dateNow = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate date1 = LocalDate.parse(sdf.format(dateOfBirth.getTime()), formatter);
         LocalDate date2 = LocalDate.parse(sdf.format(dateNow.getTime()), formatter);
 
         Period period = Period.between(date1, date2);
-        System.out.println("Прожито: " + period.getYears() + " " + correctYear(period.getYears()) + ", " + period.getMonths() + " " + correctMonth(period.getMonths()) +  " и " + period.getDays() + " " + correctDay(period.getDays()));
+        System.out.println("Lived: " + period.getYears() + " " + (period.getYears() == 0 ? "year" : "years") + ", " +
+                period.getMonths() + " " + (period.getMonths() == 0 ? "month" : "months") +  " and " +
+                period.getDays() + " " + (period.getDays() == 0 ? "day" : "days"));
+    }
 
-        /* Старое
-        long duration = dateNow.getTimeInMillis() - dateOfBirth.getTimeInMillis();  // сколько прошло времени от рождения
-        long livedDaysL = TimeUnit.MILLISECONDS.toDays(duration);           // переводим милиссеки в дни
-        int livedDays = (int) livedDaysL;                                   // переводим в int (я так хочу)
+//    Only for RU
+//    private static String correctYear(int x) {
+//        if (x == 0 || (x >= 11 && x <= 20)) return "лет";   // если 0 или с 11 до 20 - лет
+//        if (x%10 == 1) return "год";                        // если окончается на 1 - год
+//        if ((x%10 == 2) | (x%10 == 3) | (x%10 == 4)) return "года"; // на 2, 3 или 4 - года
+//        else return "лет";                                  // все остальное - лет
+//    }  // Как правильно выдать - год, года или лет.
+//    private static String correctDay(int x) {
+//        if (x == 0 || (x >= 11 && x <= 20)) return "дней";  // если 0 - лет
+//        if (x%10 == 1) return "день";                       // если окончается на 1 - год
+//        if ((x%10 == 2) | (x%10 == 3) | (x%10 == 4)) return "дня"; // на 2, 3 или 4 - года
+//        else return "дней";                                 // все остальное - лет
+//    }   // Как правильно выдать - день, дня или дней.
+//    private static String correctMonth(int x) {
+//        if (x == 0) return "месяцев";
+//        if (x == 1) return "месяц";
+//        if (x == 2 | x == 3 | x == 4) return "месяца";
+//        else return "месяцев";
+//    } // Как правильно выдать - месяц, месяца или месяцев.
 
-        int wholeYears = livedDays / 365;       // Целых лет
-        int leftDays = livedDays % 365;         // Остаток дней
-        System.out.println("Прожито: " + wholeYears + " " + correctYear(wholeYears) + ", " + leftDays + " " + correctDay(leftDays)); */
-    } // Сколько прожил
-    private static String correctYear(int x) {
-        if (x == 0 || (x >= 11 && x <= 20)) return "лет";   // если 0 или с 11 до 20 - лет
-        if (x%10 == 1) return "год";                        // если окончается на 1 - год
-        if ((x%10 == 2) | (x%10 == 3) | (x%10 == 4)) return "года"; // на 2, 3 или 4 - года
-        else return "лет";                                  // все остальное - лет
-    }  // Как правильно выдать - год, года или лет.
-    private static String correctDay(int x) {
-        if (x == 0 || (x >= 11 && x <= 20)) return "дней";  // если 0 - лет
-        if (x%10 == 1) return "день";                       // если окончается на 1 - год
-        if ((x%10 == 2) | (x%10 == 3) | (x%10 == 4)) return "дня"; // на 2, 3 или 4 - года
-        else return "дней";                                 // все остальное - лет
-    }   // Как правильно выдать - день, дня или дней.
-    private static String correctMonth(int x) {
-        if (x == 0) return "месяцев";
-        if (x == 1) return "месяц";
-        if (x == 2 | x == 3 | x == 4) return "месяца";
-        else return "месяцев";
-    } // Как правильно выдать - месяц, месяца или месяцев.
-
-    /** Считает сколько осталось жить и выводит */
+    /** Counts how much time a person has to live and print it */
     private static void leftToLive(Calendar dateOfBirth, boolean sex, String country, HashMap<String, Integer> map){
         Calendar dateNow = Calendar.getInstance();
 
@@ -894,20 +895,24 @@ public class TimeCounter {
 
         dateOfBirth.add(Calendar.YEAR, map.get(whatToAdd));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");              // в каком формате вывести
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");        // в каком формате парсить
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);                  // format to print
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);    // format to parse
 
-        LocalDate date1 = LocalDate.parse(sdf.format(dateNow.getTime()), formatter);    // создаем LocalDate сейчас
-        LocalDate date2 = LocalDate.parse(sdf.format(dateOfBirth.getTime()), formatter);// LocalDate даты смерти
+        LocalDate date1 = LocalDate.parse(sdf.format(dateNow.getTime()), formatter);    // create LocalDate now
+        LocalDate date2 = LocalDate.parse(sdf.format(dateOfBirth.getTime()), formatter);// LocalDate date of death
 
-        if (dateNow.before(dateOfBirth)) {                  // если Дата_смерти еще не наступила
-            Period period = Period.between(date1, date2);   // сравнить сейчас с датой смерти и вывести сколько ост.
-            System.out.println("Осталось: " + period.getYears() + " " + correctYear(period.getYears()) + ", " + period.getMonths() + " " + correctMonth(period.getMonths()) + " " + period.getDays() + " " + correctDay(period.getDays()));
+        if (dateNow.before(dateOfBirth)) {                  // if Death_Date didn't pass
+            Period period = Period.between(date1, date2);   // compare now with date of death and show how much left
+            System.out.println("Left: " + period.getYears() + " " + (period.getYears() == 0 ? "year" : "years") + ", " +
+                    period.getMonths() + " " + (period.getMonths() == 0 ? "month" : "months") + " " +
+                    period.getDays() + " " + (period.getDays() == 0 ? "day" : "days"));
         } else {                                            // если Дата_смерти уже наступила
             Period period = Period.between(date2, date1);   // сравнить дату смерти с сейчас и вывести сколько пережил
-            System.out.println("Вы прожили на " + period.getYears() + " " + correctYear(period.getYears()) + ", " + period.getMonths() + " " + correctMonth(period.getMonths()) + " и " + period.getDays() + " " + correctDay(period.getDays()) + " больше!");
+            System.out.println("You lived over  " + period.getYears() + " " + (period.getYears() == 0 ? "year" : "years") + ", " +
+                    period.getMonths() + " " + (period.getMonths() == 0 ? "month" : "months") + " and " +
+                    period.getDays() + " " + (period.getDays() == 0 ? "day!" : "days!"));
         }
 
-        System.out.printf("Среднее время жизни для %s в %s составляет %d %s.%n", (sex ? "мужчин" : "женщин"), country, map.get(whatToAdd), correctYear(map.get(whatToAdd)));
+        System.out.printf("Average time of life for %s in %s is %d %s.%n", (sex ? "man" : "woman"), country, map.get(whatToAdd), (map.get(whatToAdd) == 0 ? "year" : "years"));
     }
 }
